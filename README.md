@@ -8,15 +8,15 @@ The system connects to a public MQTT broker and allows **three independent LEDs 
 
 This project demonstrates:
 
-* Embedded networking
-* MQTT publish/subscribe architecture
-* FreeRTOS task communication using queues
-* Hardware control using GPIO
-* IoT cloud messaging concepts
+- Embedded networking
+- MQTT publish/subscribe architecture
+- FreeRTOS task communication using queues
+- Hardware control using GPIO
+- IoT cloud messaging concepts
 
 ---
 
-## System Architecture
+# System Architecture
 
 ```
 Mobile MQTT App / MQTT Client
@@ -44,26 +44,26 @@ Mobile MQTT App / MQTT Client
 
 ---
 
-## Hardware Used
+# Hardware Used
 
-* Infineon **PSoC Edge E84 Development Kit**
-* Onboard **Wi-Fi module**
-* 3 Onboard LEDs
-* User Button (optional)
-
----
-
-## Software Components
-
-* **FreeRTOS**
-* **Infineon WiFi Connection Manager**
-* **Infineon MQTT Client Library**
-* **Device Configurator**
-* **ModusToolbox**
+- Infineon **PSoC Edge E84 Development Kit**
+- Onboard **Wi-Fi module**
+- 3 Onboard LEDs
+- User Button (optional)
 
 ---
 
-## MQTT Configuration
+# Software Components
+
+- **FreeRTOS**
+- **Infineon WiFi Connection Manager**
+- **Infineon MQTT Client Library**
+- **Device Configurator**
+- **ModusToolbox**
+
+---
+
+# MQTT Configuration
 
 Public MQTT broker used:
 
@@ -75,22 +75,22 @@ Protocol: MQTT
 
 ---
 
-## MQTT Topics
+# MQTT Topics
 
-| Topic             | Function              |
-| ----------------- | --------------------- |
-| `kirtan/led1`     | Control LED 1         |
-| `kirtan/led2`     | Control LED 2         |
-| `kirtan/led3`     | Control LED 3         |
+| Topic | Function |
+|------|------|
+| `kirtan/led1` | Control LED 1 |
+| `kirtan/led2` | Control LED 2 |
+| `kirtan/led3` | Control LED 3 |
 | `kirtan/psoc/pub` | Publish device status |
 
 ---
 
-## MQTT Payload Commands
+# MQTT Payload Commands
 
-| Payload    | Action        |
-| ---------- | ------------- |
-| `TURN ON`  | Turns LED ON  |
+| Payload | Action |
+|------|------|
+| `TURN ON` | Turns LED ON |
 | `TURN OFF` | Turns LED OFF |
 
 Example message:
@@ -102,26 +102,188 @@ Payload: TURN ON
 
 ---
 
-## FreeRTOS Task Architecture
+# Project Setup Instructions
 
-The application uses multiple tasks:
+## 1. Install ModusToolbox
 
-### MQTT Task
-
-Responsible for:
-
-* MQTT initialization
-* Connecting to broker
-* Maintaining connection
-* Handling reconnects
+Download and install **ModusToolbox IDE** from the Infineon website.
 
 ---
 
-### Publisher Task
+## 2. Clone the Repository
 
-Publishes device status to the MQTT broker.
+```bash
+git clone https://github.com/kirtanS29/MQTT_CLENT_SUBSCRIBER_PSOC.git
+```
 
-Example publish message:
+Open the project in **ModusToolbox IDE**.
+
+---
+
+# 3. Configure WiFi Credentials
+
+Open the file:
+
+```
+wifi_config.h
+```
+
+Update your WiFi details:
+
+```c
+#define WIFI_SSID       "YOUR_WIFI_NAME"
+#define WIFI_PASSWORD   "YOUR_WIFI_PASSWORD"
+```
+
+Example:
+
+```c
+#define WIFI_SSID       "kirtan"
+#define WIFI_PASSWORD   "12345678"
+```
+
+---
+
+# 4. Verify MQTT Configuration
+
+Open the file:
+
+```
+mqtt_client_config.h
+```
+
+Broker configuration:
+
+```c
+#define MQTT_BROKER_ADDRESS   "test.mosquitto.org"
+#define MQTT_PORT             1883
+```
+
+Topics used:
+
+```c
+#define MQTT_SUB_TOPIC1     "kirtan/led1"
+#define MQTT_SUB_TOPIC2     "kirtan/led2"
+#define MQTT_SUB_TOPIC3     "kirtan/led3"
+```
+
+---
+
+# 5. Build the Project
+
+From the project terminal run:
+
+```bash
+make build
+```
+
+Or build directly from **ModusToolbox IDE**.
+
+---
+
+# 6. Program the Board
+
+Connect the **PSoC Edge E84 board** via USB.
+
+Flash the firmware:
+
+```bash
+make program
+```
+
+Or click **Program** inside the IDE.
+
+---
+
+# 7. Open Serial Terminal
+
+Use the following configuration:
+
+```
+Baudrate: 115200
+```
+
+Example serial output:
+
+```
+Wi-Fi Connection Manager initialized.
+
+Wi-Fi Connecting to 'kirtan'
+
+Successfully connected to Wi-Fi network 'kirtan'.
+IPv4 Address Assigned: 10.246.170.144
+
+MQTT library initialization successful.
+
+MQTT connection successful.
+```
+
+---
+
+# Testing the Project
+
+Use any MQTT client.
+
+Recommended apps:
+
+- MQTT Dash
+- IoT MQTT Panel
+- MQTT Explorer
+- HiveMQ Web Client
+
+---
+
+## Example Test
+
+Send message:
+
+```
+Topic: kirtan/led1
+Payload: TURN ON
+```
+
+Result:
+
+```
+LED1 on the board turns ON
+```
+
+Another test:
+
+```
+Topic: kirtan/led2
+Payload: TURN OFF
+```
+
+Result:
+
+```
+LED2 turns OFF
+```
+
+---
+
+# FreeRTOS Task Architecture
+
+The application uses multiple tasks.
+
+---
+
+## MQTT Task
+
+Responsible for:
+
+- MQTT initialization
+- Broker connection
+- Reconnection handling
+
+---
+
+## Publisher Task
+
+Publishes device status to MQTT broker.
+
+Example:
 
 ```
 Publisher: Publishing 'TURN OFF' on topic 'kirtan/psoc/pub'
@@ -129,7 +291,7 @@ Publisher: Publishing 'TURN OFF' on topic 'kirtan/psoc/pub'
 
 ---
 
-### Subscriber Task
+## Subscriber Task
 
 Handles incoming MQTT messages and controls LEDs.
 
@@ -137,17 +299,17 @@ Steps:
 
 1. Receive MQTT message
 2. Identify topic
-3. Convert payload to device state
-4. Send command to queue
-5. Control corresponding LED
+2. Convert payload to device state
+3. Send command to queue
+4. Control corresponding LED
 
 ---
 
-## Queue Communication
+# Queue Communication
 
-FreeRTOS queues are used to communicate between tasks.
+FreeRTOS queues are used for inter-task communication.
 
-Example structure used:
+Example structure:
 
 ```c
 typedef struct{
@@ -157,17 +319,15 @@ typedef struct{
 } subscriber_data_t;
 ```
 
-This allows safe communication between:
+Flow:
 
 ```
-MQTT Callback → Subscriber Task → LED Control
+MQTT Callback → Queue → Subscriber Task → LED Control
 ```
 
 ---
 
-## MQTT Callback Flow
-
-When a message is received:
+# MQTT Callback Flow
 
 ```
 MQTT Broker
@@ -190,76 +350,46 @@ LED State Updated
 
 ---
 
-## Example Serial Output
+# Example Serial Output
 
 ```
-Wi-Fi Connection Manager initialized.
-
-Wi-Fi Connecting to 'kirtan'
-
-Successfully connected to Wi-Fi network 'kirtan'.
-IPv4 Address Assigned: 10.246.170.144
-
-MQTT library initialization successful.
-
-'psocedge-mqtt-client862' connecting to MQTT broker 'test.mosquitto.org'...
-
-MQTT connection successful.
-
-Subscribed to topics successfully
-
 Incoming MQTT message:
 Topic: kirtan/led1
 Payload: TURN ON
 ```
 
----
-
-## Testing the Project
-
-You can test this project using any MQTT client.
-
-Recommended mobile apps:
-
-* MQTT Dash
-* IoT MQTT Panel
-* MQTT Explorer
-
-Send messages like:
-
 ```
-Topic: kirtan/led1
-Payload: TURN ON
+Incoming MQTT message:
+Topic: kirtan/led2
+Payload: TURN OFF
 ```
 
-LED1 on the board will turn ON.
+---
+
+# Key Concepts Demonstrated
+
+- Embedded WiFi connectivity
+- MQTT publish/subscribe architecture
+- FreeRTOS task management
+- Inter-task communication using queues
+- Hardware control using GPIO
+- IoT device architecture
 
 ---
 
-## Key Concepts Demonstrated
-
-* Embedded Wi-Fi connectivity
-* MQTT publish/subscribe model
-* FreeRTOS task management
-* Inter-task communication using queues
-* Hardware control using GPIO
-* IoT device architecture
-
----
-
-## Future Improvements
+# Future Improvements
 
 Possible enhancements:
 
-* Add TLS secure MQTT connection
-* Use AWS IoT or Azure IoT Hub
-* Add sensor data publishing
-* Add device shadow/state synchronization
-* Implement OTA firmware updates
+- Add TLS secure MQTT connection
+- Integrate with AWS IoT or Azure IoT
+- Add sensor data publishing
+- Implement OTA firmware updates
+- Add device state synchronization
 
 ---
 
-## Author
+# Author
 
 Kirtan
 
@@ -267,6 +397,6 @@ Embedded Systems Engineer (Learning & Building)
 
 ---
 
-## License
+# License
 
-This project is for educational and demonstration purposes.
+This project is for **educational and demonstration purposes**.
